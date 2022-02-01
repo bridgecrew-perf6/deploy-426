@@ -3,7 +3,7 @@ REPOSITORY=/home/ec2-user/build
 
 echo "> 현재 구동중인 애플리케이션 pid 확인"
 
-CURRENT_PID=$(pgrep -f pgrep -f deploy*jar)
+CURRENT_PID=$(pgrep -f deploy*jar)
 
 echo "> $CURRENT_PID"
 
