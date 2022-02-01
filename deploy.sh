@@ -1,5 +1,4 @@
 #!/bin/bash
-REPOSITORY=/home/ec2-user/build
 
 echo "> 현재 구동중인 애플리케이션 pid 확인"
 
@@ -18,8 +17,8 @@ fi
 
 echo "> 새 애플리케이션 배포"
 
-JAR_NAME=$(ls $REPOSITORY/ | grep jar)
+JAR_NAME=$(ls | grep jar)
 
 echo "> JAR Name: $JAR_NAME"
 
-nohup java -jar $REPOSITORY/$JAR_NAME > $REPOSITORY/app.log 2>&1 &
+nohup java -jar "$JAR_NAME" > app.log 2>&1 &
