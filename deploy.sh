@@ -4,6 +4,9 @@ REPOSITORY=/home/ec2-user/build
 
 cd $REPOSITORY
 
+echo "> 프로덕션 프로퍼티 복사"
+cp ../application.yml .
+
 echo "> 현재 구동중인 애플리케이션 pid 확인"
 
 CURRENT_PID=$(pgrep -f deploy*jar)
