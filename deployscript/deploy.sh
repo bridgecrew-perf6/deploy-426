@@ -6,7 +6,7 @@ cd $REPOSITORY
 
 echo "> 현재 구동중인 set 확인"
 CURRENT_PROFILE=$(curl -s http://localhost/profile)
-echo "> $CURRENT_CURRENT_PROFILE"
+echo "> $CURRENT_PROFILE"
 
 # 쉬고 있는 set 찾기: 하나의 set이 동작중이면 다른 set은 쉬고있음.
 if [ "$CURRENT_PROFILE" == set1 ]
@@ -35,7 +35,7 @@ cp ../application.yml .
 echo "> 현재 $IDLE_PROFILE 구동중인 애플리케이션 pid 확인"
 IDLE_PID=$(pgrep -f $IDLE_APPLICATION)
 
-if [ -z $IDLE_PROFILE ]
+if [ -z "$IDLE_PID" ]
 then
   echo "> 현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
 else
@@ -49,12 +49,12 @@ echo "> $IDLE_PROFILE 배포"
 nohup java -jar -Dspring.profiles.active=$IDLE_PROFILE $IDLE_APPLICATION > app.log 2>&1 &
 
 echo "> $IDLE_PROFILE 5초 후 Health Check 시작"
-echo "> curl -s http::/localhost:$IDLE_PORT/health"
+echo "> curl -s http://localhost:$IDLE_PORT/management/health"
 sleep 5
 
 for retry_count in {1..10}
 do
-  response=$(curl -s http::/localhost:$IDLE_PORT/management/health)
+  response=$(curl -s http://localhost:$IDLE_PORT/management/health)
   up_count=$(echo "$response" | grep 'UP' | wc -l)
 
   if [ $up_count -ge 1 ]
