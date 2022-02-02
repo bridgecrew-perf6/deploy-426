@@ -19,7 +19,7 @@ public class HelloController {
     @GetMapping
     public String hello(HttpServletRequest request) {
         log.info("[{}] request", request.getRemoteAddr());
-        return "2차 버전";
+        return "3차 버전";
     }
 
     @GetMapping("/profile")
