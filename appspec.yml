@@ -14,7 +14,7 @@ hooks:
   BeforeInstall:
     - location: deploy-before.sh
       runas: ec2-user
-  Install:
+  AfterInstall:
     - location: deploy.sh
       runas: ec2-user
   ApplicationStart:
