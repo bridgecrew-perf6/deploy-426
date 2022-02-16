@@ -19,7 +19,7 @@ public class HelloController {
 
     @GetMapping
     public String hello(HttpServletRequest request) {
-        log.info("[{}] request", request.getRemoteAddr());
+        log.info("[{}] request", request.getHeader("X-Real-IP"));
         return "6차 버전";
     }
 
@@ -32,6 +32,6 @@ public class HelloController {
 
     @PostMapping("/done")
     public void done(HttpServletRequest request) {
-        log.info("[{}] request ok", request.getRemoteAddr());
+        log.info("[{}] request done", request.getHeader("X-Real-IP"));
     }
 }
