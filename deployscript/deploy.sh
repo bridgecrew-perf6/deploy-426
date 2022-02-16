@@ -4,75 +4,67 @@ REPOSITORY=/home/ec2-user/build
 
 cd $REPOSITORY
 
-echo "> 현재 구동중인 set 확인"
-CURRENT_PROFILE=$(curl -s http://localhost/profile)
-echo "> $CURRENT_PROFILE"
+echo ">> 현재 구동중인 애플리케이션 pid 확인"
+CURRENT_PID=$(pgrep -f .jar)
 
-# 쉬고 있는 set 찾기: 하나의 set이 동작중이면 다른 set은 쉬고있음.
-if [ "$CURRENT_PROFILE" == set1 ]
+echo ">> CURRENT_PID = $CURRENT_PID"
+
+if [ -z "$CURRENT_PID" ]
 then
-  IDLE_PROFILE=set2
-  IDLE_PORT=8082
-elif [ "$CURRENT_PROFILE" == set2 ]
-then
-  IDLE_PROFILE=set1
-  IDLE_PORT=8081
+  echo ">> 현재 구동중인 애플리케이션이 없습니다."
 else
-  echo "> 일치하는 Profile이 없습니다. Profile: $CURRENT_PROFILE"
-  echo "> set1을 할당합니다. IDLE_PROFILE=set1"
-  IDLE_PROFILE=set1
-  IDLE_PORT=8081
+  echo ">> 구동중인 애플리케이션을 종료 합니다."
 fi
 
-JAR_NAME=$(ls $REPOSITORY/ | grep jar)
-
-IDLE_APPLICATION=$IDLE_PROFILE-deploy.jar
-cp "$JAR_NAME" ./$IDLE_APPLICATION
-
-echo "> 프로덕션 프로퍼티 복사"
-cp ../application.yml .
-
-echo "> 현재 $IDLE_PROFILE 구동중인 애플리케이션 pid 확인"
-IDLE_PID=$(pgrep -f $IDLE_APPLICATION)
-
-if [ -z "$IDLE_PID" ]
-then
-  echo "> 현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
-else
-  echo "> kill -15 $IDLE_PID"
-  kill -15 "$IDLE_PID"
-  echo "> sleep 5 seconds..."
-  sleep 5
-fi
-
-echo "> $IDLE_PROFILE 배포"
-nohup java -jar -Dspring.profiles.active=$IDLE_PROFILE $IDLE_APPLICATION > app.log 2>&1 &
-
-echo "> $IDLE_PROFILE 5초 후 Health Check 시작"
-echo "> curl -s http://localhost:$IDLE_PORT/management/health"
-sleep 5
-
-for retry_count in {1..10}
+for try_count in {1..10}
 do
-  response=$(curl -s http://localhost:$IDLE_PORT/management/health)
-  up_count=$(echo "$response" | grep 'UP' | wc -l)
-
-  if [ $up_count -ge 1 ]
+  PID=$(pgrep -f .jar)
+  if [ -z "$PID" ]
   then
-    echo "> Health check 성공"
+    break
+  fi
+
+  echo ">> try_count = $try_count"
+  echo ">> kill -15 $PID"
+  kill -15 "$PID"
+
+  echo ">> sleep 0.2 seconds.."
+  sleep 0.2
+
+  if [ -z "$(pgrep -f .jar)" ]
+  then
+    echo ">> 구동중인 애플리케이션 종료 성공"
     break
   else
-    echo "> Health check의 응답을 알 수 없거나 혹은 status가 UP이 아닙니다."
-    echo "> Health check: ${response}"
+    if [ "$try_count" -eq 10 ]
+    then
+      echo ">> 구동중인 애플리케이션 종료를 실패했습니다."
+      echo ">> 배포를 종료합니다."
+      exit 1
+    else
+      echo ">> 다시 시도합니다."
+    fi
   fi
-
-  if [ "$retry_count" -eq 10 ]
-  then
-    echo "> Health check 실패"
-    echo "> nginx에 연결하지 않고 배포를 종료합니다."
-    exit 1
-  fi
-
-  echo "> Health check 연결 실패 재시도..."
-  sleep 5
 done
+
+echo ">> 새 애플리케이션 배포"
+JAR_NAME=$(ls $REPOSITORY/ | grep jar)
+
+if [ -z "$JAR_NAME" ]
+then
+  echo ">> jar 파일을 찾을 수 없습니다."
+  echo ">> 배포를 종료합니다."
+fi
+
+echo ">> JAR_NAME = $JAR_NAME"
+nohup java -jar "$JAR_NAME" > app.log 2>&1 &
+sleep 3
+
+NEW_PID=$(pgrep -f .jar)
+if [ -z "$NEW_PID" ]; then
+  echo ">> 새 애플리케이션 배포에 실패했습니다."
+else
+  echo ">> 새 애플리케이션 배포 성공 PID = $NEW_PID"
+fi
+
+echo ">> 배포 프로세스를 종료합니다."
