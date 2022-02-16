@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,5 +28,10 @@ public class HelloController {
         return Arrays.stream(environment.getActiveProfiles())
                 .findFirst()
                 .orElse("default");
+    }
+
+    @PostMapping("/done")
+    public void done(HttpServletRequest request) {
+        log.info("[{}] request", request.getRemoteAddr());
     }
 }
