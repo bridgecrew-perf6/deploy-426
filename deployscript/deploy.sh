@@ -57,7 +57,7 @@ then
 fi
 
 echo ">> JAR_NAME = $JAR_NAME"
-nohup java -jar "$JAR_NAME" > app.log 2>&1 &
+nohup java -jar "$JAR_NAME" > /home/ec2-user/app.log 2>&1 &
 sleep 3
 
 NEW_PID=$(pgrep -f .jar)
