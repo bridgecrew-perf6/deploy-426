@@ -32,6 +32,6 @@ public class HelloController {
 
     @PostMapping("/done")
     public void done(HttpServletRequest request) {
-        log.info("[{}] request", request.getRemoteAddr());
+        log.info("[{}] request ok", request.getRemoteAddr());
     }
 }
