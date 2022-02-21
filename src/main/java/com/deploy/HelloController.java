@@ -3,11 +3,14 @@ package com.deploy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Slf4j
@@ -31,7 +34,8 @@ public class HelloController {
     }
 
     @PostMapping("/done")
-    public void done(HttpServletRequest request) {
+    public void done(HttpServletRequest request) throws IOException {
         log.info("[{}] request done", request.getHeader("X-Real-IP"));
+        log.info("request body: \n{}", StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8));
     }
 }
