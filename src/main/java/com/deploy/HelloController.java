@@ -44,8 +44,9 @@ public class HelloController {
     }
 
     @PostMapping("/api/callback/{requestType}")
-    public void callback(@PathVariable String requestType, HttpServletRequest request) throws IOException {
+    public String callback(@PathVariable String requestType, HttpServletRequest request) throws IOException {
         log.info("requestType:{}, request body: \n{}", requestType, StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8));
+        return "OK";
     }
 
 
